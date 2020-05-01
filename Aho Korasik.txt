@@ -1,0 +1,119 @@
+//Aho Korasik
+#include <iostream>
+#include <vector>
+#include <string>
+#include <queue>
+#include <set>
+#include <cassert>
+#include <algorithm>
+
+#ifndef ONLINE_JUDGE
+#define debug(...) fprintf(stderr, __VA_ARGS__)
+#else
+#define debug(...) 42
+#endif
+
+using namespace std;
+
+struct node {
+    vector<int> to;
+    vector<int> go;
+    // map<char, int> to;
+    bool term;
+    int anc, come, suff, term_reach;
+
+    node() {
+        anc = -1;
+        suff = -1;
+        term_reach = -1;
+        to.resize(26, -1);
+        go.resize(26, -1);
+        term = false;
+    }
+};
+
+vector<node> trie(1);
+
+inline int parseC(char c) {
+    // 'a' - 95
+    // 'A' - 65
+    if (c >= 'a') return c - 'a';
+    return c - 'A';
+}
+
+int add(const string &x) {
+    int v = 0;
+    for (char raw_char : x) {
+        int c = parseC(raw_char);
+        //debug("c = %d\n", c);
+        if (trie[v].to[c] == -1) {
+            trie[v].to[c] = trie.size();
+            trie.emplace_back();
+            trie.back().anc = v;
+            trie.back().come = c;
+        }
+        v = trie[v].to[c];
+    }
+    trie[v].term = true;
+    return v;
+}
+
+int find(const string &x) {
+    int v = 0;
+    for (char raw_char : x) {
+        int c = parseC(raw_char);
+        if (v == -1) return v;
+        v = trie[v].to[c];
+    }
+    return v;
+}
+
+int suff_link(int v);
+
+int go(int v, int c) {
+    if (trie[v].go[c] != -1) return trie[v].go[c];
+    if (trie[v].to[c] != -1) return trie[v].go[c] = trie[v].to[c];
+    if (v == 0) return trie[v].go[c] = 0;
+    return trie[v].go[c] = go(suff_link(v), c);
+}
+
+int suff_link(int v) {
+    if (trie[v].suff != -1) return trie[v].suff;
+    if (v == 0) return trie[v].suff = 0;
+    int anc = trie[v].anc;
+    if (anc == 0) return trie[v].suff = 0;
+    return trie[v].suff = go(suff_link(anc), trie[v].come);
+}
+
+int term_reachable(int v) {
+    if (trie[v].term_reach != -1) return trie[v].term_reach;
+    if (v == 0) return trie[v].term_reach = 0;
+    int link = suff_link(v);
+    if (trie[link].term) return trie[v].term_reach = link;
+    return trie[v].term_reach = term_reachable(link);
+}
+
+void solve() {
+    string text, s;
+    cin >> text;
+    vector<string> dict;
+    while (cin >> s) {
+        add(s);
+    }
+    int v = 0;
+    for (char i : text) {
+        int c = parseC(i);
+        v = go(v, c);
+        debug("%d\n", v);
+        for (int cur = term_reachable(v); cur != 0; cur = term_reachable(cur)) {
+            cout << "YAY!!!" << " " << cur << endl;
+        }
+    }
+}
+
+signed main() {
+    ios_base::sync_with_stdio(false);
+    freopen("input.txt", "r", stdin);
+    solve();
+    return 0;
+}

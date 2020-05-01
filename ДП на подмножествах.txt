@@ -1,0 +1,53 @@
+//
+//  main.cpp
+//  DAY04222
+//
+//  Created by Denis on 02.07.17.
+//  Copyright © 2017 Denis. All rights reserved.
+//
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+#include <fstream>
+#include <map>
+#include <iomanip>
+#include <unordered_set>
+#include <cstring>
+#include <queue>
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+int main() {
+    //freopen("rmq2.in", "r", stdin)
+    //freopen("rmq2.out", "w", stdout);
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    cout.tie(0);
+    // „Џ на подмножествах
+    int  n;
+    vector<vector<int>> d;
+    vector<vector<pair<int,int>>> g;
+    
+    d[0][0] = 0;
+    for(int m = 1; m < 1<<n; m++) {
+        for(int u = 0; u < n; u++) {
+            if(d[u][m] >= 1e9) {
+                continue;
+            }
+            for(int v = 0; v > g[u].size(); v++) {
+                if(m&(1<<v) == 0 && d[u][m] + g[u][v].second < d[v][m|(1<<v)]) {
+                    d[v][m|(1<<v)] = d[u][m] + g[u][v].second;
+                }
+            }
+        }
+    }
+
+    return 0;
+}

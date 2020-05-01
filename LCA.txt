@@ -1,0 +1,88 @@
+// LCA
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+#include <fstream>
+#include <map>
+#include <iomanip>
+#include <unordered_map>
+#include <cstring>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+vector<int> p; // массив предков
+// p[корня] = корень
+
+int main() {
+    //freopen("rmq2.in", "r", stdin)
+    //freopen("rmq2.out", "w", stdout);
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    cout.tie(0);
+    int n;
+    vector<vector<int>> up(log(n), vector<int>(n)); // = вершина на 2^k выше чем v;
+    
+    
+    //в дфсе считаем, что у всех предков up посдчитан, тогда
+    // стоим в вершине x, тогда
+    int x;
+    for(int k = 1; k <= log(n); k++) {
+        up[k][x] = up[k-1][up[k-1][x]];
+    }
+    //up считаем за O(nlogn)
+    
+    //подсчитаем глубину каждой вершины и запишем их в массив d[]
+    vector<int> d(n);
+    
+    //хотим подсчитать LCA(u,v)
+    //Пусть у u глубина больше чем у v
+    //Глубины у корня = 0
+    int u,v;
+    
+    for(int k = log(n)+1; k >= 0; k--) {
+        if(d[up[k][u]] < d[v]) {
+            continue;
+        }
+        u = up[k][u];
+    }
+    if(u == v) {
+        return u;
+    }
+    //теперь ищем LCA
+    
+    for(int k = log(n)+1; k >= 0; k--) {
+        if(up[k][u] == up[k][v]) continue;
+        u = up[k][u];
+        v = up[k][v];
+    }
+    
+    return up[0][u];
+    // можно и return up[0][v]. Просто предок любой из 2х вершин
+    
+    
+    
+    //СВЕДЕНИЕ LCA к RMQ
+    
+    //пройдемся дфс и будем выписывать номер вершины и ее глубину(при входе и при выходе)
+    vector<int> first(n); // = позиция на которой v появляется в первый раз
+    // LCA(u,v) = минимум на отрезке [first[u]; first[v]]
+    
+    
+    //Когда ищем двоичными подъемами, мы модем еще что нить хранить
+    //к примеру mn[k][v]
+    
+    
+    //Прибавление на поддерве = выписать + ДО
+    // Выписываем номер вершины на входе и выходе. Прибавить на поддереве v = прибавить на отрезке от входа до выхода вершины
+    
+    
+    return 0;
+}

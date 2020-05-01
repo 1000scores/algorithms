@@ -1,0 +1,61 @@
+//
+//  main.cpp
+//  DAY04222
+//
+//  Created by Denis on 02.07.17.
+//  Copyright © 2017 Denis. All rights reserved.
+//
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+#include <stdio.h>
+#include <string>
+#include <map>
+
+
+
+using namespace std;
+
+typedef long long ll;
+
+//struct dot {
+//    int x,y;
+//    bool operator<(const dot &d)const> {
+//        return x < d.x;
+//    }
+//};
+char mem[150000000];
+char *ptr = mem;
+inline void* operator new (size_t n) {
+    void *ret = ptr;
+    ptr += n;
+    return ret;
+}
+inline void operator delete(void *) {
+    
+}
+template<typename T>
+struct MyVector {
+    vector<T> data;
+    T &operator[](int idx) {
+        data.at(idx);
+    }
+};
+
+//mingw или g++
+
+int main() {
+    cin.tie(0);
+    cout.tie(0);
+    ios_base::sync_with_stdio(false);
+    MyVector<int> t;
+   
+}
+
+
+

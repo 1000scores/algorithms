@@ -1,0 +1,92 @@
+//„……‚ ’…‡Š‚
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+
+using namespace std;
+
+typedef long long ll;
+
+
+vector<ll> tree;
+vector<ll> add;
+
+void update(int id, int x, ll val, int cur_left, int cur_right) {
+    if(x < cur_left || x >= cur_right) {
+        return;
+    }
+    if(x == cur_left && x + 1 == cur_right) {
+        tree[id] = val;
+        return;
+    }
+    push(id, cur_left, cur_right);
+    int m = (cur_left + cur_right)/2;
+    update(id*2,x,val,cur_left,m);
+    update(id*2+1,x,val,m,cur_right);
+    tree[id] = max(tree[id*2], tree[id*2+1]);
+}
+
+void push(int id, int cur_left, int cur_right) {
+    if(add[id] != 0) {
+        tree[id] += add[id];
+    }
+    if(cur_left + 1 != cur_right) {
+        add[id*2] += add[id];
+        add[id*2+1] += add[id];
+    }
+    add[id] = 0;
+}
+
+void add_segment(int id, ll val, int cur_left, int cur_right, int l, int r) {
+    push(id, cur_left, cur_right);
+    if(r <= cur_left || l >= cur_right) {
+        return;
+    }
+    if(l <= cur_left && r >= cur_right) {
+        add[id] += val;
+        push(id, cur_left, cur_right);
+        return;
+    }
+    int m = (cur_left + cur_right)/2;
+    add_segment(id*2, val, cur_left, m, l, r);
+    add_segment(id*2+1, val, m, cur_right, l, r);
+    tree[id] = max(tree[id*2], tree[id*2+1]);
+}
+ll get(int id, int cur_left, int cur_right, int l, int r) {
+    push(id, cur_left, cur_right);
+    if(cur_left >= r || cur_right <= l) {
+        return 0;
+    }
+    if(cur_left >= l && cur_right <= r) {
+        return tree[id];
+    }
+    int m = (cur_left + cur_right)/2;
+    return max(get(id*2, cur_left, m, l, r), get(id*2+1, m, cur_right, l, r));
+}
+
+int main(int argc, const char * argv[]) {
+    int n, k, m;
+    cin >> n >> k >> m;
+    tree.resize(4*n);
+    add.resize(4*n);
+    for(int i = 0; i < m; i++) {
+        int x,y;
+        cin >> x >> y;
+        x++;
+        y++;
+        ll max = get(1,1,n+1,x,y);
+        if(max == k) {
+            cout << 0 << endl;
+        } else {
+            add_segment(1, 1, 1, n+1, x, y);
+            cout << 1 << endl;
+        }
+    }	
+    return 0;
+}
+
+
+
+

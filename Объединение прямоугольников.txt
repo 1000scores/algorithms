@@ -1,0 +1,224 @@
+
+//Объединение прямоугольников
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+#include <stdio.h>
+#include <string>
+#include <queue>
+#include <sstream>
+#include <unordered_set>
+#include <unordered_map>
+#include <map>
+
+#include <ctime>
+using namespace std;
+
+typedef long long ll;
+vector<pair<ll, ll>> tree;
+vector<ll> add;
+void push(ll id, ll curl, ll curr) {
+    if(curl == curr) {
+        tree[id].first += add[id];
+        add[id] = 0;
+        return;
+    }
+    tree[id].first += add[id];
+    add[id*2] += add[id];
+    add[id*2+1] += add[id];
+    add[id] = 0;
+}
+void update(ll id, ll curl ,ll curr, ll x, ll val) {
+    if(curr < x || curl > x) {
+        return;
+    }
+    if(curl == x && curl == curr) {
+        tree[id].first = 0;
+        tree[id].second = val;
+        return;
+    }
+    ll m = (curl+curr)/2;
+    update(id*2, curl, m, x, val);
+    update(id*2+1, m+1, curr, x, val);
+    tree[id].second = tree[id*2].second + tree[id*2+1].second;
+    
+}
+void addSeg(ll id, ll curl, ll curr, ll l, ll r, ll val) {
+    push(id, curl, curr);
+    if(curr < l || curl > r) {
+        return;
+    }
+    if(curl >= l && curr <= r) {
+        add[id] += val;
+        push(id, curl, curr);
+        return;
+    }
+    ll m = (curl+curr)/2;
+    addSeg(id*2, curl, m, l, r, val);
+    addSeg(id*2+1, m+1, curr, l, r, val);
+    if(tree[id*2].first < tree[id*2+1].first) {
+        tree[id] = tree[id*2];
+        return;
+    }
+    if(tree[id*2+1].first < tree[id*2].first) {
+        tree[id] = tree[id*2+1];
+        return;
+    }
+    if(tree[id*2].first == tree[id*2+1].first) {
+        tree[id] = tree[id*2];
+        tree[id].second += tree[id*2+1].second;
+        return;
+    }
+    
+}
+void prnt(ll id, ll curl, ll curr) {
+    push(id, curl, curr);
+    if(curl == curr) {
+        cout << "{" << tree[id].first << ", " << tree[id].second << "}" << " ";
+        return;
+    }
+    ll m = (curl + curr)/2;
+    prnt(id*2, curl, m);
+    prnt(id*2+1, m+1, curr);
+}
+
+pair<ll, ll> getMin(ll id, ll curl, ll curr) {
+    push(id, curl, curr);
+    return tree[1];
+}
+
+struct poll {
+    ll x, y1, y2;
+    ll pls;
+    poll(ll _x, ll _y1, ll _y2, ll _pls) {
+        x = _x;
+        y1 = _y1;
+        y2 = _y2;
+        pls = _pls;
+    }
+    
+};
+vector<poll> ar;
+
+bool comp(poll a, poll b)
+{
+    if (a.x == b.x){
+        if (a.pls > b.pls) return true;
+        else return false;
+    }
+    if (a.x < b.x) return true;
+    return false;
+}
+
+int main() {
+    cin.tie(0);
+    cout.tie(0);
+    ios_base::sync_with_stdio(false);
+    ll n;
+    cin >> n;
+    if(n == 0) {
+        cout << 0 << endl;
+        return 0;
+    }
+    vector<poll> ar;
+    vector<ll> kek;
+    vector<pair<pair<ll,ll>, pair<ll,ll>>> inp(n);
+    vector<ll> lolx;
+    vector<ll> loly;
+    for(ll i = 0; i < n; i++) {
+        ll x1, y1, x2, y2;
+        cin >> x1 >> y1 >> x2 >> y2;
+        ll sd = 1e9+123;
+        x1+=sd;
+        y1+=sd;
+        x2+=sd;
+        y2+=sd;
+        kek.push_back(y1);
+        kek.push_back(y2);
+        
+        
+        lolx.push_back(x1);
+        lolx.push_back(x2);
+        loly.push_back(y1);
+        loly.push_back(y2);
+        
+        
+        inp[i] = {{x1, y1}, {x2, y2}};
+        //        ar.push_back(poll(x1, y1, y2, 1));
+        //        ar.push_back(poll(x2, y1, y2, -1));
+    }
+    ll lx, ly, rx, ry;
+    sort(lolx.begin(), lolx.end());
+    sort(loly.begin(), loly.end());
+    lx = lolx[0];
+    ly = loly[0];
+    rx = lolx[lolx.size()-1];
+    ry = loly[loly.size()-1];
+    sort(kek.begin(), kek.end());
+    map<ll, ll> toOld;
+    map<ll, ll> toNw;
+    ll ind = 0;
+    for(ll i = 0; i < kek.size(); i++) {
+        if(toNw.find(kek[i]) != toNw.end()) {
+            continue;
+        }
+        toOld[ind] = kek[i];
+        toNw[kek[i]] = ind;
+        ind++;
+    }
+    for(ll i = 0; i < inp.size(); i++) {
+        ll x1 = inp[i].first.first;
+        ll y1 = toNw[inp[i].first.second];
+        ll x2 = inp[i].second.first;
+        ll y2 = toNw[inp[i].second.second];
+        
+        ar.push_back(poll(x1, y1, y2, 1));
+        ar.push_back(poll(x2, y1, y2, -1));
+    }
+    sort(ar.begin(), ar.end(), comp);
+    
+    ll sz = toOld.size();
+    tree.assign(4*sz, {0, 0});
+    add.assign(4*sz, 0);
+    ll ans = 0;
+    ll ppp = 0;
+    for(ll i = 0; i < toOld.size(); i++) {
+        update(1, 0, sz-1, i, toOld[i] - ppp);
+        ppp = toOld[i];
+        //        cout << tree[1].second << endl;
+    }
+    //    prnt(1, 0, sz-1);
+    //    cout << endl;
+    ll prex = 0;
+    for(ll i = 0; i < ar.size(); i++) {
+        poll p = ar[i];
+        
+        
+        pair<ll, ll> cur = getMin(1, 0, sz-1);
+        if(i == 0 || ar[i-1].x != p.x) {
+            ans += (p.x-prex)*cur.second;
+        }
+        if(p.pls == 1) {
+            addSeg(1, 0, sz-1, min(p.y1, p.y2)+1, max(p.y1, p.y2), 1);
+            prex = p.x;
+        }
+        
+        
+        if(p.pls == -1) {
+            
+            addSeg(1, 0, sz-1, min(p.y1, p.y2)+1, max(p.y1, p.y2), -1);
+        }
+        
+        //        prnt(1, 0, sz-1);
+        //        cout << "ans = " << ans << endl;
+        prex = p.x;
+    }
+    ll all = rx*ry;
+    cout << all - ans << endl;
+    
+    
+}

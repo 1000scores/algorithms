@@ -1,0 +1,233 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <chrono>
+
+static const int BYTES8 = 8;
+
+typedef long long ll;
+typedef long double ld;
+
+
+enum class Napravlenie {
+    Nikuda = 0,
+    Nalevo = 1,
+    Napravo = 2,
+    Vverh = 3,
+    Wniz = 4,
+    Takzhe = 5
+};
+
+
+unsigned long get_value3(unsigned char *pamyt)
+{
+    return (pamyt[1] << 8) | pamyt[0] << 16 | (pamyt[2]);
+}
+
+struct GyroPlace
+{
+    unsigned char pamyt[BYTES8];
+    Napravlenie napravlenie;
+    GyroPlace() {
+        napravlenie = Napravlenie::Nikuda;
+    }
+    
+    
+};
+
+struct Poziciya
+{
+    int x, y;
+    Poziciya() {
+        
+    }
+    Poziciya(int _x, int _y) {
+        x = _x;
+        y = _y;
+    }
+};
+
+using namespace std;
+
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+//    srand (time(NULL));
+    int n;
+    cin >> n;
+    
+    
+    vector<Poziciya> to(n);
+    for (int i = 0; i < n; i++) {
+        int x, y;
+        cin >> x >> y;
+        to[i] = Poziciya(x, y);
+    }
+    GyroPlace me{};
+    
+    
+    for (int i = 0; i < BYTES8; i++) {
+        int m;
+        cin >> m;
+        me.pamyt[i] = m;
+    }
+    int m;
+    cin >> m;
+    vector<GyroPlace> soseds(m);
+    for (int i = 0; i < m; i++) {
+        int dir;
+        cin >> dir;
+        soseds[i].napravlenie = Napravlenie(dir);
+        for (int j = 0; j < BYTES8; j++) {
+            int m;
+            cin >> m;
+            soseds[i].pamyt[j] = m;
+        }
+    }
+    if (me.pamyt[0] == 0) {
+        me.pamyt[0] = 1;
+        
+        
+        ////////////////////
+        
+        std::chrono::time_point<std::chrono::system_clock> now = std::chrono::system_clock::now();
+        auto duration = now.time_since_epoch();
+        auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+        me.pamyt[1] = milli.count()%256;
+        auto micro = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+        me.pamyt[2] = micro.count()%256;
+        auto nano = std::chrono::duration_cast<std::chrono::nanoseconds>(duration);;
+        me.pamyt[3] = nano.count()%256;
+        
+//            
+//            auto time = chrono::high_resolution_clock::now();
+            
+//            me.pamyt[i] = time.time_since_epoch()%256;
+        ////////////////////
+        
+        
+        
+        me.napravlenie = Napravlenie::Takzhe;
+        me.pamyt[4] = int(Napravlenie::Nikuda);
+        memcpy(&me.pamyt[5], &me.pamyt[1], 3);
+    } else if (me.pamyt[0] >= 1 && me.pamyt[0] < n) {
+        unsigned long cur = get_value3(me.pamyt + 5);
+        int max_ind = -1;
+        unsigned long max_val = cur;
+        
+        
+        for (int i = 0; i < m; i++) {
+            unsigned long temp = get_value3(soseds[i].pamyt + 5);
+            if (temp > max_val) {
+                max_val = temp;
+                max_ind = i;
+            }
+        }
+        if (max_ind >= 0) {
+            memcpy(me.pamyt + 5, soseds[max_ind].pamyt + 5, 3);
+            me.pamyt[4] = int(soseds[max_ind].napravlenie);
+        }
+        me.pamyt[0]++;
+        me.napravlenie = Napravlenie::Takzhe;
+    } else if (me.pamyt[0] >= n && me.pamyt[0] <= n * 2) {
+        
+        
+        int new_dir = int(Napravlenie::Takzhe);
+        
+        
+        
+        if (me.pamyt[4] == int(Napravlenie::Nalevo)
+            || me.pamyt[4] == int(Napravlenie::Napravo)
+            || me.pamyt[4] == int(Napravlenie::Vverh)
+            || me.pamyt[4] == int(Napravlenie::Wniz)) {
+            
+            
+            int i;
+            for (i = 0; i < m; i++) {
+                if (int(soseds[i].napravlenie) == me.pamyt[4]) {
+                    new_dir = int(soseds[i].pamyt[4]);
+                    break;
+                }
+            }
+            
+            me.napravlenie = Napravlenie(me.pamyt[4]);
+            me.pamyt[4] = new_dir;
+            
+            
+        } else {
+            me.napravlenie = Napravlenie::Takzhe;
+        }
+        me.pamyt[0]++;
+    } else if (me.pamyt[0] == n * 2 + 1) {
+        
+        
+        
+        vector<unsigned long> copter_ids(n);
+        for (int i = 0; i < m; i++) {
+            copter_ids[i] = get_value3(soseds[i].pamyt + 1);
+        }
+        unsigned long me_id = get_value3(me.pamyt + 1);
+        copter_ids[m] = me_id;
+        sort(copter_ids.begin(), copter_ids.end());
+        memset(me.pamyt + 4, 0, 4);
+        int last = 0;
+        for (int i = 0; i < int(copter_ids.size()); i++) {
+            last = i;
+            if (me_id == copter_ids[i]) {
+                break;
+            }
+        }
+        
+        
+        me.pamyt[4] = last + 1;
+        
+        
+        int razx = to[last].x - to[0].x;
+        int razy = to[last].y - to[0].y;
+        
+        
+        me.pamyt[4] = razx;
+        me.pamyt[5] = razx >> 8;
+        me.pamyt[6] = razy;
+        me.pamyt[7] = razy >> 8;
+        me.pamyt[0]++;
+        me.napravlenie = Napravlenie::Takzhe;
+    } else {
+        int razx = (short)(me.pamyt[4] | me.pamyt[5] << 8);
+        int razy = (short)(me.pamyt[6] | me.pamyt[7] << 8);
+        if (razx < 0) {
+            razx++;
+            me.napravlenie = Napravlenie::Nalevo;
+        } else if (razx > 0) {
+            razx--;
+            me.napravlenie = Napravlenie::Napravo;
+        } else if (razy < 0) {
+            razy++;
+            me.napravlenie = Napravlenie::Wniz;
+        } else if (razy > 0) {
+            razy--;
+            me.napravlenie = Napravlenie::Vverh;
+            
+        } else {
+            me.napravlenie = Napravlenie::Takzhe;
+        }
+        me.pamyt[4] = razx;
+        me.pamyt[5] = razx >> 8;
+        me.pamyt[6] = razy;
+        me.pamyt[7] = razy >> 8;
+    }
+    
+    cout << int(me.napravlenie) << endl;
+    for (int i = 0; i < BYTES8; i++) {
+        std::cout << int(me.pamyt[i]) << " ";
+    }
+    cout << endl;
+}

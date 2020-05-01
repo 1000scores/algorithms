@@ -1,0 +1,101 @@
+//•ýøè
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+
+using namespace std;
+
+typedef long long ll;
+
+long long p = 123;
+long long mod1 = 1e9+7;
+long long mod2 = 1e9+9;
+vector<long long> st1;
+vector<long long> st2;
+vector<pair<ll,ll>> hashes;
+vector<pair<long long, long long>> getHashFromStr(string s) {
+    vector<pair<ll,ll>> hashes(s.length());
+    hashes[0].first = s[0];
+    hashes[0].second = s[0];
+    //st1 - stepeni lubogo chisla
+    for(int i = 1; i < s.length(); i++) {
+        hashes[i].first = ((hashes[i-1].first*p)%mod1 + s[i]%mod1)%mod1;
+        hashes[i].second = ((hashes[i-1].second*p)%mod2 + s[i]%mod2)%mod2;
+    }
+    return hashes;
+}
+pair<long long, long long> getHashLR(int l, int r) {
+    pair<long long, long long> hash2;
+    int n = hashes.size();
+    if(l-1 >= 0 ) {
+        hash2.first = ((hashes[r].first - (hashes[l-1].first*st1[r-l+1])%mod1) + mod1) % mod1;
+        hash2.second = ((hashes[r].second - (hashes[l-1].second*st2[r-l+1])%mod2) + mod2) % mod2;
+    } else {
+        hash2.first = hashes[r].first;
+        hash2.second = hashes[r].second;
+        
+    }
+    return hash2;
+}
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    cout.tie(0);
+    string s;
+    cin >> s;
+    pair<long long, long long> hash1 = {0,0};
+    int lastInd = 0;
+    st1.resize(s.length());
+    st2.resize(s.length());
+    st1[0] = 1;
+    st2[0] = 1;
+    for(int i = 1; i < st1.size(); i++) {
+        st1[i] = (st1[i-1]*p)%mod1;
+        st2[i] = (st2[i-1]*p)%mod2;
+    }
+    
+    int len = -1;
+    bool test = false;
+    hashes = getHashFromStr(s);
+    for(int i = 0; i < s.length(); i++) {
+        int k = i+len;
+        int nk = s.length();
+
+        if(k >= nk) {
+            pair<long long, long long> hashS1 = getHashLR(0, (s.length()-1 - i));
+            pair<long long, long long> hashS2 = getHashLR(i, s.length()-1);
+        if(hashS1.first == hashS2.first && hashS1.second == hashS2.second) {
+            break;
+        } else {
+            test = true;
+        }
+        }
+        pair<long long, long long> hash2 = {0,0};
+        if(i!=0 && !test) {
+        hash2 = getHashLR(i, i+len);
+        }
+        if(!test && i != 0 && hash1.first == hash2.first && hash1.second == hash2.second) {
+            i+= len;
+        } else {
+            len++;
+            hash1 = getHashLR(0, len);
+            i = len;
+        }
+        test = false;
+    }
+
+    cout << len + 1;
+    return 0;
+}
+
+
+
+
+
+
+

@@ -1,0 +1,266 @@
+//KorasikMy
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <set>
+#include <map>
+#include <cmath>
+#include <iomanip>
+#include <fstream>
+#include <bitset>
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef pair<ll, ll> Pair;
+
+
+struct node {
+    map<int, int> to;
+    map<int, int> go;
+    bool term;
+    int pre, came, suff, term_reach;
+    int needAns;
+    int h;
+    node() {
+        pre = -1;
+        suff = -1;
+        term_reach = -1;
+        term = false;
+        
+        
+        needAns = -1;
+        h = 0;
+    }
+};
+vector<node> trie(1);
+void add(const string &s, int _needAns) {
+    int v = 0;
+    for(int i = 0; i < s.size(); i++) {
+        int c = s[i]-'a';
+        if(trie[v].to.find(c) == trie[v].to.end()) {
+            trie[v].to[c] = trie.size();
+            trie.push_back(node());
+            trie.back().pre = v;
+            trie.back().came = c;
+            trie.back().h = trie[v].h+1;
+        }
+        v = trie[v].to[c];
+    }
+    trie[v].term = true;
+    if(trie[v].needAns == -1) {
+        trie[v].needAns = _needAns;
+    }
+    
+}
+
+
+int suff_link(int v);
+
+int go(int v, int c) {
+    if(trie[v].go.find(c) != trie[v].go.end()) return trie[v].go[c];
+    if(trie[v].to.find(c) != trie[v].to.end()) return trie[v].go[c] = trie[v].to[c];
+    if(v == 0) return trie[v].go[c] = 0;
+    return trie[v].go[c] = go(suff_link(v), c);
+}
+
+int suff_link(int v) {
+    if(trie[v].suff != -1) return trie[v].suff;
+    if(v == 0) return trie[v].suff = 0;
+    int pre = trie[v].pre;
+    if(pre == 0) return trie[v].suff = 0;
+    return trie[v].suff = go(suff_link(pre), trie[v].came);
+}
+
+int term_reachable(int v) {
+    if(trie[v].term_reach != -1) return trie[v].term_reach;
+    if(v == 0) return trie[v].term_reach = 0;
+    int link = suff_link(v);
+    if(link == -1) return trie[v].term_reach = 0;
+    if(trie[link].term) return trie[v].term_reach = link;
+    return trie[v].term_reach = term_reachable(link);
+}
+
+vector<vector<int>> mySolve(string text,int n, vector<string> ar) {
+    for(int i = 0; i < n; i++) {
+        add(ar[i], i);
+    }
+    int v = 0;
+    vector<vector<int>> ans(n);
+    trie[0].suff = 0;
+    for(int i = 0; i < text.size(); i++) {
+        if(i == 13) {
+            int kek = 0;
+        }
+        //        cout << text[i] << endl;
+        int c = text[i] - 'a';
+        v = go(v, c);
+        if(trie[v].term) {
+            int len = trie[v].h;
+            ans[trie[v].needAns].push_back(i-len+1);
+        }
+        for(int cur = term_reachable(v); cur != 0; cur = term_reachable(cur)) {
+            int len = trie[cur].h;
+            ans[trie[cur].needAns].push_back(i-len+1);
+        }
+    }
+    //    cout << "--------------------------" << endl;
+    return ans;
+    for(int i = 0; i < ans.size(); i++) {
+        cout << ans[i].size() << " ";
+        for(int j = 0; j < ans[i].size(); j++) {
+            cout << ans[i][j] + 1<< " ";
+        }
+        cout << endl;
+    }
+}
+
+vector<vector<int>> solve(string text, int n, vector<string> ar) {
+    vector<vector<int>> ret(n);
+    for(int i = 0; i < n; i++) {
+        int cnt = 0;
+        for(int j = 0; j < text.size(); j++) {
+            if(cnt == ar[i].size()) {
+                ret[i].push_back(j);
+                cnt = 0;
+            }
+            if(text[j] == ar[i][cnt]) {
+                cnt++;
+            } else {
+                cnt = 0;
+            }
+        }
+    }
+    return ret;
+}
+
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+//    cout << 'e' - 'a' << endl;
+//    mySolve("bsfy", 1, {"vkalzp"});
+    trie.reserve(1e6+10);
+    string text;
+    cin >> text;
+    int n;
+    cin >> n;
+    
+    vector<string> ar(n);
+    map<string, int> inp;
+    vector<int> where(n, -1);
+    for(int i = 0; i < n; i++) {
+        cin >> ar[i];
+        if(inp.find(ar[i]) != inp.end()) {
+            where[i] = inp[ar[i]];
+        } else {
+            inp[ar[i]] = i;
+        }
+        
+    }
+    
+    vector<vector<int>> ans = mySolve(text, n, ar);
+    
+    for(int i = 0; i < ans.size(); i++) {
+        if(where[i] != -1) {
+            cout << ans[where[i]].size() << " ";
+            for(int j = 0; j < ans[where[i]].size(); j++) {
+                cout << ans[where[i]][j] + 1 << " ";
+            }
+            cout << endl;
+            continue;
+        }
+        cout << ans[i].size() << " ";
+        for(int j = 0; j < ans[i].size(); j++) {
+            cout << ans[i][j] + 1 << " ";
+        }
+        cout << endl;
+    }
+    
+//
+//    for(int q = 5; q < 100; q++) {
+//        int n = rand()%5 + 1;
+//        string text = "";
+//        int textSz = rand()%5 + 1;
+//        vector<string> ar(n);
+//        for(int i = 0; i < textSz; i++) {
+//            char c = rand()%26 + 'a';
+//            text += c;
+//        }
+//        for(int i = 0; i < n; i++) {
+//            int curSz = rand()%6 + 1;
+//            string curStr = "";
+//            for(int j = 0; j < curSz; j++) {
+//                char c = rand()%26 + 'a';
+//                curStr += c;
+//            }
+//            ar[i] = curStr;
+//        }
+//        cout << text << endl;
+//        cout << n << endl;
+//        for(int i = 0; i < n; i++) {
+//            cout << ar[i] << endl;
+//        }
+//        cout << "---------------------------" << endl;
+//        vector<vector<int>> myAns = mySolve(text, n, ar);
+//        vector<vector<int>> ans = solve(text, n, ar);
+//        if(ans.size() != myAns.size()) {
+//            cout << "WA1" << endl;
+//            return 0;
+//        }
+//        for(int i = 0; i < n; i++) {
+//            if(ans[i].size() != myAns[i].size()) {
+//                cout << "WA2" << endl;
+//                return 0;
+//            }
+//            for(int j = 0; j < ans[i].size(); j++) {
+//                if(ans[i][j] != myAns[i][j]) {
+//                    cout << "WA3" << endl;
+//                    return 0;
+//                }
+//            }
+//        }
+//        cout << "OK" << endl;
+//    }
+
+    
+    return 0;
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

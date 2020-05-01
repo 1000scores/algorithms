@@ -1,0 +1,112 @@
+//LCA Norm
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <set>
+#include <map>
+#include <cmath>
+#include <iomanip>
+
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef pair<ll, ll> Pair;
+
+vector<vector<ll>> g;
+vector<ll> tin;
+vector<ll> tout;
+vector<vector<ll>> up;
+
+int timer = 0;
+void dfs1(ll v, ll p) { // in begin p = 0
+    tin[v] = timer++;
+    up[v][0] = p;
+    for(ll i = 1; i < up[v].size(); i++) {
+        up[v][i] = up[up[v][i-1]][i-1];
+    }
+    ll mx = 0;
+    for(ll i = 0; i < g[v].size(); i++) {
+        dfs1(g[v][i], v);
+    }
+    
+    tout[v] = timer++;
+}
+bool a (ll u, ll v) {
+    return tin[u] <= tin[v] && tin[v] <= tout[u];
+}
+
+ll lca(ll v, ll u) {
+    if(a(v, u)) return v;
+    if(a(u, v)) return u;
+    for(ll i = up[v].size()-1; i >= 0; i--) {
+        if(!a(up[v][i], u)) {
+                v = up[v][i];
+        }
+    }
+    return up[v][0];
+}
+
+ll logg(ll a) {
+    ll ans = 0;
+    while(a > 0) {
+        a/=2;
+        ans++;
+    }
+    return ans+2;
+}
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    ll n, m;
+    cin >> n >> m;
+    g.resize(n);
+    tin.resize(n);
+    tout.resize(n);
+    up.resize(n, vector<ll>(logg(n)));
+    vector<pair<ll, ll>> ask(m);
+    for(ll i = 1; i < n; i++) {
+        ll a;
+        cin >> a;
+        g[a].push_back(i);
+    }
+    ll a1, a2;
+    cin >> a1 >> a2;
+    ask[0] = {a1, a2};
+    ll x, y, z;
+    cin >> x >> y >> z;
+    for(ll i = 1; i < m; i++) {
+        ll b1 = (x*ask[i-1].first + y*ask[i-1].second + z)%n;
+        ask[i].first = b1;
+        ll b2 = (x*ask[i-1].second + y*ask[i].first + z)%n;
+        ask[i].second = b2;
+    }
+    dfs1(0, 0);
+    ll ans = 0;
+    ll pre = 0;
+    for(ll i = 0; i < ask.size(); i++) {
+        if(i == 0) {
+            int temp = lca(ask[i].first, ask[i].second);
+            ans += temp;
+            pre = temp;
+            continue;
+        }
+        int temp = lca((ask[i].first+pre)%n, ask[i].second);
+        ans += temp;
+        pre = temp;
+    }
+    cout << ans << endl;
+    
+    return 0;
+    
+}
+
+
+
+
+
+

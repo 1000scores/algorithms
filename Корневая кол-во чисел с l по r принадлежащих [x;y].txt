@@ -1,0 +1,65 @@
+//Корневая Декомпозиция (кол-во чисел с l по r принадлежащих [x;y])
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+#include <stdio.h>
+#include <string>
+
+using namespace std;
+
+typedef long long ll;
+
+int main() {
+    cin.tie(0);
+    cout.tie(0);
+    ios_base::sync_with_stdio(false);
+    int n = 1e5, k = sqrt(n);
+    vector<int> a(n);
+    vector<int> mx(k);
+    vector<int> b[n/k];
+    for(int i = 0; i < n; i++) {
+        b[i/k].push_back(a[i]);
+    }
+    for(int i = 0; i < n/k; i++) {
+        sort(b[i].begin(), b[i].end());
+    }
+    int m; //количество запросов
+    cin >> m;
+    for(int i = 0; i < m; i++) {
+        int l,r,x,y;
+        cin >> l >> r >> x >> y;
+        int res = 0;
+        
+        while(l<=r) {
+            if((l%k == 0) && ( l + k -1 <= r)) {
+                int num = l/k;
+                res += lower_bound(b[num].begin(), b[num].end(), y+1) - lower_bound(b[num].begin(), b[num].end(), x);
+                
+            } else {
+                res = (int)((x<=a[l] && (a[l] <= y)));
+                l++;
+            }
+        }
+    }
+    
+    // обновление
+    int x1,y1;
+    cin >> x1 >> y1;
+    //a[x1] = y1
+
+    
+
+    return 0;
+}
+
+
+
+
+
+
+

@@ -1,0 +1,49 @@
+Если в графе m ребер, то кол-во треугольников не больше m*sqrt(m)
+//
+//  main.cpp
+//  DAY04222
+//
+//  Created by Denis on 02.07.17.
+//  Copyright © 2017 Denis. All rights reserved.
+//
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+#include <stdio.h>
+#include <string>
+
+using namespace std;
+
+    int n;
+    vector<int> g;
+    int v;
+    int version = 0;
+    for(int v = 0; v < n; v++) {
+        version++;
+        for(int u:g[v]) {
+            used[u] = version;
+        }
+	for(int u : g[v]) {
+	    if(make_pair(deg[v],v) > make_pair(deg[u],u)) {
+		for(int w : g[u]) {
+			if((w<min(u,v) && (used[w] == version)) {
+			    res++;`
+			}
+		 }
+	  }
+
+    }
+    return 0;
+}
+
+
+
+
+
+
+

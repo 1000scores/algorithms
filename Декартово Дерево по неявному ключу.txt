@@ -1,0 +1,116 @@
+//Декартово Дерево по неявному ключу
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+#include <stdio.h>
+#include <string>
+#include <queue>
+#include <sstream>
+#include <unordered_set>
+#include <unordered_map>
+#include <map>
+
+#include <ctime>
+using namespace std;
+
+typedef long long ll;
+
+
+struct node {
+    int y, size = 1;
+    //в ДД по неявному X это индекс в массиве
+    node *l = NULL, *r = NULL;
+    node() {
+        y = rand();
+    }
+};
+
+int size(node *v) {
+    if(v == NULL) {
+        return 0;
+    } else {
+        return v->size;
+    }
+}
+void upd(node *v) {
+    v->size = 1 + size(v->l) + size(v->r);
+}
+
+typedef pair<node*, node*> Pair;
+
+node* merge(node *L, node *R) {
+    if(L == NULL) {
+        return R;
+    }
+    if(R == NULL) {
+        return L;
+    }
+    if(L->y < R->y) {
+        R->l = merge(L, R->l);
+        upd(R);
+        return R;
+    } else {
+        L->r = merge(L->r, R);
+        upd(L);
+        return L;
+    }
+}
+
+
+node *root = NULL;
+
+
+node* kth(node *p, int k) {
+    int s = size(p->l);
+    if(size(p) < k) {
+        //ERROR
+    }
+    if(s == k-1) {
+        return p;
+    }
+    if(s >= k) {
+        return kth(p->l, k);
+    } else {
+        return kth(p->r, k-s-1);
+    }
+}
+
+Pair split(node *p, int k) {
+    if(p == NULL) {
+        return {NULL, NULL};
+    }
+    if(size(p->l) <= k) {
+        Pair t = split(p->r, k-size(p->l)-1);
+        p->r = t.first;
+        upd(p);
+        return {p, t.second};
+    } else {
+        Pair t = split(p->l, k);
+        p->l = t.second;
+        upd(p);
+        return {t.first, p};
+    }
+}
+
+
+
+int main() {
+    cin.tie(0);
+    cout.tie(0);
+    ios_base::sync_with_stdio(false);
+    
+}
+
+
+
+
+
+
+
+

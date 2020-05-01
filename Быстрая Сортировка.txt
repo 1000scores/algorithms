@@ -1,0 +1,59 @@
+//Быстрая сортировка
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+
+using namespace std;
+
+typedef long long ll;
+
+vector<int> ar;
+void qsort(int b, int e) {
+    int l = b;
+    int r = e;
+    int piv = ar[(l+r)/2];
+    
+    while (l <= r)
+    {
+        while (ar[l] < piv && l<=r)
+            l++;
+        while (ar[r] > piv && l<=r)
+            r--;
+        if (l <= r)
+            swap (ar[l++], ar[r--]);
+        
+    }
+    if (b < r)
+        qsort (b, r);
+    if (e > l)
+        qsort (l, e);
+    
+    
+}
+int main(int argc, const char * argv[]) {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    int n;
+    cin >> n;
+    ar.resize(n);
+    
+    for(int i = 0; i < n; i++) {
+        cin >> ar[i];
+    }
+    qsort(0,n-1);
+    for(int i = 0; i < n; i++) {
+        cout << ar[i] << " ";
+    }
+    
+    
+    return 0;
+}
+
+
+
+
+
+

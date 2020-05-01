@@ -1,0 +1,162 @@
+//
+//  main.cpp
+//  DAY04222
+//
+//  Created by Denis on 02.07.17.
+//  Copyright © 2017 Denis. All rights reserved.
+//
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+#include <stdio.h>
+#include <string>
+
+using namespace std;
+
+typedef long long ll;
+vector<pair<ll,ll>> xy;
+ll miny, maxx;
+struct g {
+    ll x,y;
+    g(ll _x, ll _y) {
+        x = _x;
+        y = _y;
+    }
+    g() {
+        
+    }
+    double len() {
+        return sqrt(x*x + y*y);
+    }
+};
+ll vec(g a, g b) {
+    return a.x * b.y - b.x * a.y;
+}
+
+bool cmp(pair<ll,ll> _a, pair<ll,ll> _b) {
+    g a(maxx - _a.first, miny - _a.second);
+    g b(maxx - _b.first, miny - _b.second);
+    ll s = vec(a,b);
+    if(s > 0) {
+        return true;
+    } else {
+        if(s == 0) {
+            if(a.len() < b.len()) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        return false;
+    }
+}
+
+int main() {
+    cin.tie(0);
+    cout.tie(0);
+    ios_base::sync_with_stdio(false);
+    ll n;
+    cin >> n;
+    xy.resize(n);
+    miny = 1e9;
+    maxx = 0;
+    for(int i = 0; i < n; i++) {
+        ll x,y;
+        cin >> x >> y;
+        x+=10001;
+        y+=10001;
+        xy[i] = make_pair(x, y);
+        if(y < miny) {
+            miny = y;
+            maxx = x;
+        }
+        if(y == miny) {
+            if(x > maxx) {
+                maxx = x;
+            }
+        }
+    }
+    if(n == 1) {
+        cout << 0 << " " <<0;
+        return 0;
+    }
+
+    sort(xy.begin(), xy.end(), cmp);
+    stack<pair<ll, ll>> st;
+    st.push(xy[0]);
+    pair<ll,ll> lastDot = xy[0];
+    st.push(xy[1]);
+    for(int i = 2; i < xy.size(); i++) {
+        pair<ll,ll> a = st.top();
+        pair<ll,ll> b = xy[i];
+        g vecL(a.first - lastDot.first, a.second - lastDot.second);
+        g vecN(b.first - lastDot.first, b.second - lastDot.second);
+        if(vec(vecL,vecN) > 0) {
+            lastDot = st.top();
+            st.push(b);
+        } else {
+            if(vec(vecL,vecN) == 0) {
+                st.push(b);
+            } else {
+                while(st.size() > 1) {
+                    pair<ll,ll> p = st.top();
+                    st.pop();
+                    pair<ll,ll> p2 = st.top();
+                    g vecL(p.first - p2.first, p.second - p2.second);
+                    g vecN(b.first - p2.first, b.second - p2.second);
+                    if(vec(vecL, vecN) < 0) {
+                        continue;
+                    } else {
+                        if(vec(vecL, vecN) == 0) {
+                        } else {
+                            st.push(p);
+                            break;
+                        }
+                    }
+                }
+                lastDot = st.top();
+                st.push(b);
+            }
+        }
+    }
+    long double S = 0;
+    long double P = 0;
+    pair<ll, ll> f1 = st.top();
+    pair<ll, ll> f2 = {0,0};
+    ll leftx = -1e5;
+    ll lefty = -1e5;
+    while(st.size() > 0) {
+        if(st.size() == 1) {
+            f2 = st.top();
+            break;
+        }
+        pair<ll, ll> a = st.top();
+        st.pop();
+        pair<ll, ll> b = st.top();
+        g vecC(a.first - b.first, a.second - b.second);
+        g vec1(a.first - leftx, a.second - lefty);
+        g vec2(b.first - leftx, b.second - lefty);
+        P += vecC.len();
+        S += vec(vec1,vec2);
+    }
+    
+    pair<ll, ll> a = f1;
+    st.pop();
+    pair<ll, ll> b = f2;
+    g vecC(a.first - b.first, a.second - b.second);
+    g vec1(a.first - leftx, a.second - lefty);
+    g vec2(b.first - leftx, b.second - lefty);
+    if(n!=2) {
+    P += vecC.len();
+    }
+    S += vec(vec2,vec1);
+    S/=2.0;
+    cout << P << " " << abs(S);
+    
+    return 0;
+}

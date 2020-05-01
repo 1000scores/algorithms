@@ -1,0 +1,82 @@
+//Åéê
+#include<bits/stdc++.h>
+ 
+using namespace std;
+ 
+const int k = 26;
+ 
+struct vert{
+    bool flag = 0;
+    int ans = 0;
+    vector<int> to;
+    vert(){
+        to.assign(k, -1);
+    }
+};
+ 
+vector<vert> g;
+ 
+int add(const string &s){
+    int v = 0;
+    for(int i = 0; i < s.size(); i++){
+        int to = s[i] - 'a';
+        if(g[v].to[to] == -1){
+            g[v].to[to] = g.size();
+            g.push_back(vert());
+        }
+        v = g[v].to[to];
+    }
+    g[v].flag = 1;
+    return v;
+}
+ 
+bool find(const string &s1, const string &s2){
+    int v = 0;
+    for(int i = 0; i < s1.size(); i++){
+        int to = s1[i] - 'a';
+        if(g[v].to[to] == -1){
+            return false;
+        }
+        v = g[v].to[to];
+    }
+    int v1 = 0;
+    for(int i = 0; i < s2.size(); i++){
+        int to = s2[i] - 'a';
+        if(g[v1].to[to] == -1){
+            return false;
+        }
+        v1 = g[v1].to[to];
+    }
+    if(v1 == v) g[v].ans++;
+}
+ 
+signed main(){
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+    g.push_back(vert());
+    int n, m;
+    cin >> n;
+    vector<string> q(n);
+    for(int i = 0; i < n; i++){
+        cin >> q[i];
+    }
+    cin >> m;
+    vector<int> id(m);
+    for(int i = 0; i < m; i++){
+        string s;
+        cin>>s;
+        id[i] = add(s);
+    }
+    for(int i = 0; i < n; i++){
+        int ans = 0;
+        for(int j = 1; j <= q[i].size(); j++){
+            find(q[i].substr(0, j), q[i].substr((int)q[i].size() - j, j));
+        }
+    }
+    for(int i = 0; i < m; i++){
+        cout<<g[id[i]].ans<<'\n';
+    }
+ 
+    return 0;
+}

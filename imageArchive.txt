@@ -1,0 +1,296 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <set>
+#include <map>
+#include <cmath>
+#include <iomanip>
+#include <fstream>
+
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+
+typedef pair<ll, ll> Pair;
+int n = 51;
+int m = 100;
+//int shift = 64;
+//int shift2 = 6;
+
+
+vector<int> to2wthShift(int num, int shift2) {
+    vector<int> ans;
+    while(num > 0) {
+        ans.push_back(num%2);
+        num/=2;
+    }
+    int pre = ans.size();
+    for(int i = 0; i < shift2-pre; i++) {
+        ans.push_back(0);
+    }
+    reverse(ans.begin(), ans.end());
+    return ans;
+}
+
+vector<int> code(vector<int> ar, int shift, int shift2) {
+    vector<pair<int, int>> nw; //цифра, количество
+    for(int i = 0; i < ar.size(); i++) {
+        bool was = false;
+        int last = i;
+        for(int j = i; j < i+shift && j < ar.size(); j++) {
+            if(ar[i] == ar[j]) {
+                if(was) {
+                    nw[nw.size()-1].second++;
+                } else {
+                    was = true;
+                    nw.push_back({ar[j], 1});
+                }
+            } else {
+                break;
+            }
+            last = j;
+        }
+        i = last;
+    }
+    //        cout << nw.size() << endl;
+    vector<int> ans;
+    for(int j = 0; j < nw.size(); j++) {
+        int num = nw[j].first;
+        int cnt = nw[j].second;
+        vector<int> temp = to2wthShift(cnt-1, shift2);
+        ans.push_back(num);
+        for(int i = 0; i < temp.size(); i++) {
+            ans.push_back(temp[i]);
+        }
+    }
+    return ans;
+}
+
+void decode(string s) {
+    int globalType = 0;
+    int inLine = 0;
+    if(s[0] == '0' && s[1] == '0') {
+        for(int i = 2; i < s.size(); i++) {
+            if(inLine != 0 && inLine % m == 0) {
+                cout << endl;
+            }
+            cout << s[i];
+            inLine++;
+        }
+        return;
+    }
+    if(s[0] == '0' && s[1] == '1') {
+        int shift = 32;
+        int shift2 = 5;
+        for(int i = 2; i < s.size(); i++) {
+            char num = s[i];
+            int st = shift/2;
+            int sum = 0;
+            for(int j = i+1; j < i+1+shift2; j++) {
+                int cur = s[j]-'0';
+                sum += st*cur;
+                st/=2;
+            }
+            sum++;
+            i = i+shift2;
+            for(int j = 0; j < sum; j++) {
+                if(inLine%m == 0 && inLine != 0) {
+                    cout << endl;
+                }
+                cout << num;
+                inLine++;
+            }
+        }
+        return;
+    }
+    if(s[0] == '1' && s[1] == '0') {
+        vector<char> output;
+        int ind = 2;
+        for(; ind < s.size();) {
+            if(ind > 2) {
+                
+            }
+            int shift = 0;
+            int shift2 = 0;
+            if(s[ind] =='0' && s[ind+1] == '0') {
+                shift = 0;
+                shift2 = 0;
+                int pre = ind+2;
+                for(ind+=2; ind < pre+m; ind++) {
+                    output.push_back(s[ind]);
+                }
+                continue;
+            }
+            if(s[ind] == '0' && s[ind+1] == '1') {
+                shift = 8;
+                shift2 = 3;
+            }
+            if(s[ind] == '1' && s[ind+1] == '0') {
+                shift = 16;
+                shift2 = 4;
+            }
+            if(s[ind] == '1' && s[ind+1] == '1') {
+                shift = 32;
+                shift2 = 5;
+            }
+            ind+=2;
+            int all = 0;
+            while(all != 100) {
+                if(all > 100) {
+                    
+                }
+                char num = s[ind];
+                int sum = 0;
+                int st = shift/2;
+                ind++;
+                int pre = ind;
+                for(; ind < pre+shift2; ind++) {
+                    int cur = s[ind]-'0';
+                    sum += cur*st;
+                    st/=2;
+                }
+                sum++;
+                for(int i = 0; i < sum; i++) {
+                    output.push_back(num);
+                    all++;
+                }
+            }
+        }
+        int nowIn = 0;
+        for(int i = 0; i < output.size(); i++) {
+            if(nowIn != 0 && nowIn % m == 0) {
+                cout << endl;
+            }
+            cout << output[i];
+            nowIn++;
+        }
+    }
+
+}
+int main()
+{
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+//    string sss;
+//    cin >> sss;
+//    vector<int> lol(100);
+    string wow = "1011111111111111111111100011111111111111111111111000111111111111111111111110001111111111111111111111100011111111111011110000111111111011111111111110111000010111";
+string nah = "10 11 1 11111 1 11111 1 11111 1 00011 11111111111111111111100011111111111111111111111000111111111111111111111110001111111111101111000011111111101111111111";
+//    string ke2 = "111111100110000011100010000010100001000010100010000011111111100110";
+////    string nat = "1111111111111111111111111111111111111110000111000110001110000111111111111111111111111111111111111111";
+//////    string nah2 = "1 11111 1 11111 1 11111 1 00011";
+//    cout << nah.size() << endl;
+//    for(int i = 0; i < lol.size(); i++) {
+//        lol[i] = sss[i] - '0';
+//    }
+//    vector<int> kek = code(lol, 32, 5);
+//    for(int i = 0; i < kek.size(); i++) {
+//        cout << kek[i];
+//    }
+//    return 0;
+//    freopen("/Users/denis/Documents/xcodeWorkspace/Tinkoff/Tinkoff/input.txt", "r", stdin);
+    int type;
+    cin >> type;
+    if(type == 0) {
+        vector<int> global;
+        vector<vector<int>> ar(n, vector<int>(m));
+        for(int i = 0; i < n; i++) {
+            string s;
+            cin >> s;
+            for(int j = 0; j < m; j++) {
+                ar[i][j] = s[j] - '0';
+                global.push_back(ar[i][j]);
+            }
+        }
+        vector<int> globalCode = code(global, 32, 5);
+        
+        vector<int> byStr;
+        for(int i = 0; i < n; i++) {
+            vector<int> codeS3 = code(ar[i], 8, 3);
+            vector<int> codeS4 = code(ar[i], 16, 4);
+            vector<int> codeS5 = code(ar[i], 32, 5);
+            vector<int> srt;
+            srt = {(int)ar[i].size(), (int)codeS3.size(), (int)codeS4.size(), (int)codeS5.size()};
+            sort(srt.begin(), srt.end());
+            if(srt[0] == ar[i].size()) {
+                byStr.push_back(0);
+                byStr.push_back(0);
+                for(int j = 0; j < ar[i].size(); j++) {
+                    byStr.push_back(ar[i][j]);
+                }
+                continue;
+            }
+            if(srt[0] == codeS3.size()) {
+                byStr.push_back(0);
+                byStr.push_back(1);
+                for(int j = 0; j < codeS3.size(); j++) {
+                    byStr.push_back(codeS3[j]);
+                }
+                continue;
+            }
+            if(srt[0] == codeS4.size()) {
+                byStr.push_back(1);
+                byStr.push_back(0);
+                for(int j = 0; j < codeS4.size(); j++) {
+                    byStr.push_back(codeS4[j]);
+                }
+                continue;
+            }
+            if(srt[0] == codeS5.size()) {
+                byStr.push_back(1);
+                byStr.push_back(1);
+                for(int j = 0; j < codeS5.size(); j++) {
+                    byStr.push_back(codeS5[j]);
+                }
+                continue;
+            }
+        }
+        
+        if(global.size() <= globalCode.size() && global.size() <= byStr.size()) {
+            cout << "00";
+            for(int i = 0; i < global.size(); i++) {
+                cout << global[i];
+            }
+            return 0;
+        }
+        if(globalCode.size() <= byStr.size()) {
+            cout << "01";
+            for(int i = 0; i < globalCode.size(); i++) {
+                cout << globalCode[i];
+            }
+            return 0;
+        }
+        cout << "10";
+        for(int i = 0; i < byStr.size(); i++) {
+            cout << byStr[i];
+        }
+    } else {
+        string s;
+        cin >> s;
+        decode(s);
+    }
+
+    return 0;
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

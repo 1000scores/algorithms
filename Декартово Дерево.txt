@@ -1,0 +1,163 @@
+//Декартово Дерево
+
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+#include <stdio.h>
+#include <string>
+#include <queue>
+#include <sstream>
+#include <unordered_set>
+#include <unordered_map>
+#include <map>
+
+#include <ctime>
+using namespace std;
+
+typedef long long ll;
+
+
+struct node {
+    int x,y, size = 1, sum;
+    node *l = NULL, *r = NULL;
+    node(int _x) {
+        x = _x;
+        y = rand();
+        sum = _x;
+    }
+};
+
+int size(node *v) {
+    if(v == NULL) {
+        return 0;
+    } else {
+        return v->size;
+    }
+}
+int getSum(node *v) {
+    if(v == NULL) {
+        return 0;
+    } else {
+        return v->sum;
+    }
+}
+void upd(node *v) {
+    v->size = 1 + size(v->l) + size(v->r);
+    v->sum = getSum(v->l) + getSum(v->r) + v->sum;
+}
+
+typedef pair<node*, node*> Pair;
+
+node* merge(node *L, node *R) {
+    if(L == NULL) {
+        return R;
+    }
+    if(R == NULL) {
+        return L;
+    }
+    if(L->y < R->y) {
+        R->l = merge(L, R->l);
+        upd(R);
+        return R;
+    } else {
+        L->r = merge(L->r, R);
+        upd(L);
+        return L;
+    }
+}
+
+Pair split(node *p, int k) {
+    if(p == NULL) {
+        return {NULL, NULL};
+    }
+    if( p->x <= k) {
+        Pair t = split(p->r, k);
+        p->r = t.first;
+        upd(p);
+        return {p, t.second};
+    } else {
+        Pair t = split(p->l, k);
+        p->l = t.second;
+        upd(p);
+        return {t.first, p};
+        
+    }
+}
+
+node *root = NULL;
+
+bool find(node *p, int k) {
+    if(p == NULL) {
+        return false;
+    }
+    if(p->x == k) {
+        return true; 
+    }
+    if(p->x < k) {
+        return find(p->r, k);
+    } else {
+        return find(p->l, k);
+    }
+}
+
+void insert(int k) {
+    if(find(root, k)) {
+        return;
+    }
+    Pair t = split(root, k);
+    node *v = new node(k);
+    Root = merge(t.first, merge(v, t.second));
+}
+int min(node *p) {
+    if(p == NULL) {
+        return -1;
+    }
+    if(p->l != NULL) {
+        return min(p->l);
+    } else {
+        return p->x;
+    }
+}
+
+int lower_bound(int k) {
+    Pair t = split(root, k-1);
+    int ans = min(t.second);
+    root = merge(t.first, t.second);
+    return ans;
+}
+
+node* kth(node *p, int k) {
+    int s = size(p->l);
+    if(size(p) < k) {
+        //ERROR
+    }
+    if(s == k-1) {
+        return p;
+    }
+    if(s >= k) {
+        return kth(p->l, k);
+    } else {
+        return kth(p->r, k-s-1);
+    }
+}
+
+
+int main() {
+    cin.tie(0);
+    cout.tie(0);
+    ios_base::sync_with_stdio(false);
+    
+}
+
+
+
+
+
+
+
+

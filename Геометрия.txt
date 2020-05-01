@@ -1,0 +1,64 @@
+//Геометрия
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+
+using namespace std;
+
+typedef long long ll;
+
+
+struct r {
+    int x,y;
+    r(int _x, int _y) {
+        x = _x, y = _y;
+    }
+    double len() {
+        return sqrt(x*x + y* y);
+    }
+};
+
+struct line {
+    r a,b;
+};
+
+r operator*(double k,r a) {
+    return (r(k*a.x, k*a.y));
+}
+
+r operator+(r a, r b) {
+    return r(a.x + b.x, a.y + b.y);
+}
+
+r operator-(r a, r b) {
+    return r(a.x - b.x, a.y - b.y);
+}
+int operator%(r a, r b) { //скалярное произведение
+    return a.x*b.x + a.y*b.y;
+}
+int operator^(r a, r b) {
+    return a.x*b.y - b.x*a.y;
+}
+
+r rotate(r a) {
+    return r(-a.y, a.x); //вектор нормали. можно также return(a.y, - a.x);
+}
+
+int main() {
+    cin.tie(0);
+    ios_base::sync_with_stdio(false);
+    cout.tie(0);
+    return 0;
+}
+
+
+
+
+
+
+

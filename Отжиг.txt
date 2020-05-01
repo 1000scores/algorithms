@@ -1,0 +1,118 @@
+// отжиг
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <stack>
+#include <iterator>
+#include <string>
+#include <map>
+
+using namespace std;
+
+typedef long long ll;
+
+vector<int> createState(int k, vector<int> &best) {
+    vector<int> ans = best;
+    ans[rand()%ans.size()] = rand()%k;
+    return ans;
+}
+
+double cntCash(vector<int> &state, vector<pair<int,double>> &cards, vector<int> &buy) {
+    vector<int> money(cards.size());
+    double ans = 0;
+    for(int i = 0; i < state.size(); i++) {
+        money[state[i]]+=buy[i];
+    }
+    for(int i = 0; i < money.size(); i++) {
+        money[i] = min(cards[i].first, money[i]);
+        ans+=(money[i]/100.0)*cards[i].second;
+    }
+    return ans;
+    
+}
+double eps = 1e-7;
+
+struct old{
+    vector<int> ar;
+    double ans;
+    old(vector<int> _ar, double _ans) {
+        ans = _ans;
+        ar = _ar;
+    }
+    
+};
+int main() {
+    cin.tie(0);
+    cout.tie(0);
+    ios_base::sync_with_stdio(false);
+    freopen("/Users/denis/Documents/xcodeWorkspace/once/input.txt", "r", stdin);
+    freopen("/Users/denis/Documents/xcodeWorkspace/once/output.txt", "w", stdout);
+    int n;
+    cin >> n;
+    for(int i = 0; i < n; i++) {
+        int k;
+        cin >> k;
+        vector<pair<int,double>> v(k);
+        for(int j = 0; j < k; j++) {
+            cin >> v[j].first >> v[j].second;
+        }
+        int m;
+        cin >> m;
+        vector<int> buys(m);
+        for(int j = 0; j < m; j++) {
+            cin >> buys[j];
+        }
+        double tmax = 1;
+        int t = tmax;
+        double mx = 0;
+        vector<int> ret(m);
+        vector<int> preAr(m);
+        vector<old> all;
+        double pre = 0;
+        for(int j = 0; j < 1e6; j++) {
+            vector<int> state = createState(k, preAr);
+//            cerr << state.size() << endl;
+//            for(int g = 0; g < state.size(); g++) {
+//                cerr << state[g] << " ";
+//            }
+//            cerr << endl;
+            double curAns = cntCash(state, v, buys);
+            double probability = exp(-(pre-curAns)/t);
+            double r = (double)(rand())/RAND_MAX;
+            if(pre-curAns < 0 || r < probability) {
+                pre = curAns;
+                preAr = state;
+            }
+            if(mx < curAns) {
+                mx = curAns;
+                ret = state;
+            }
+            t = 1-j/1e8;
+            old lol = old(state, curAns);
+            all.push_back(lol);
+            if(j%(int)1e6 == 0) {
+                cerr << (j/1e6)*10 << "%" << endl;
+//                for(int g = 0; g < ret.size(); g++) {
+//                    cerr << ret[g] << " ";
+//                }
+//                cerr << endl;
+            }
+        }
+        for(int i = 0; i < all.size(); i++) {
+            if(all[i].ans > mx) {
+                ret = all[i].ar;
+                mx = all[i].ans;
+            }
+        for(int i = 0; i < ret.size();i++) {
+            cout << ret[i]+1 << " ";
+        }
+        cout << endl;
+    }
+    
+}
+
+
+
+

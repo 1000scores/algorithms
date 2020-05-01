@@ -1,0 +1,107 @@
+//RadixSort
+#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+#include <fstream>
+#include <map>
+#include <queue>
+#include <ctime>
+
+
+using namespace std;
+
+typedef long long ll;
+typedef long double ld;
+const int sz = 300000;
+
+
+void srt2(int *ar, int id) {
+    int t[257];
+    for(int i = 0; i < 257; i++) {
+        t[i] = 0;
+    }
+    int lol = 0;
+    int toRight = 0;
+    if(id == 4) {
+        lol = 2147483648;
+        toRight = 31;
+    }
+    if(id == 3) {
+        lol = 255 << 24;;
+        toRight = 24;
+    }
+    if(id == 2) {
+        lol = 255 << 16;
+        toRight = 16;
+    }
+    if(id == 1) {
+        lol = 255 << 8;
+        toRight = 8;
+    }
+    if(id == 0) {
+        lol = 255;
+        toRight = 0;
+    }
+    if(id == 5) {
+        return;
+    }
+    
+    int pre[257];
+    for(int i = 0; i < 257; i++) {
+        pre[i] = 0;
+    }
+    int vals[sz];
+    for(int i = 0; i < sz; i++) {
+        vals[i] = 0;
+    }
+    for(int i = 0; i < sz; i++) {
+        int val = ar[i]&lol;
+        val = val >> toRight;
+        t[val]++;
+        vals[i] = val;
+    }
+    for(int i = 0; i < 257; i++) {
+        if(i == 0) {
+            pre[i] = t[i];
+        } else {
+            pre[i] = pre[i-1] + t[i];
+        }
+    }
+    
+    int ret[sz];
+    for(int i = 0; i < sz; i++) {
+        ret[i] = 0;
+    }
+    if(id == 4) {
+        return;
+    } else {
+        for(int i = sz-1; i >= 0; i--) {
+            int ind = pre[vals[i]] - 1;
+            ret[ind] = ar[i];
+            pre[vals[i]]--;
+        }
+    }
+    for(int i = 0; i < sz; i++) {
+        ar[i] = ret[i];
+    }
+    srt2(ar, id+1);
+}
+
+
+
+void normRadix(int *ar) {
+    srt2(ar, 0);
+}
+
+
+int main() {
+    cin.tie(0);
+    cout.tie(0);
+    ios_base::sync_with_stdio(false);
+    
+    
+    return 0;
+}
+
